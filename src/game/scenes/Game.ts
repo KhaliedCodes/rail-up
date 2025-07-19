@@ -7,7 +7,7 @@ export class Game extends Scene {
     camera: Phaser.Cameras.Scene2D.Camera;
     background: Phaser.GameObjects.Image;
     msg_text: Phaser.GameObjects.Text;
-    mapTiles: Ground[][] = [];
+    mapTiles: Ground[]= [];
     constructor() {
         super('Game');
     }
@@ -20,19 +20,19 @@ export class Game extends Scene {
             for (let x = 0; x < data[y].length; x++) {
                 switch (data[y][x]) {
                     case CONSTANTS.TERRAIN_RIGHT_INDEX: 
-                        this.mapTiles[y][x] = this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT);
+                        this.mapTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT));
                         break;
                     case CONSTANTS.TERRAIN_LEFT_INDEX:
-                        this.mapTiles[y][x] = this.createTile(x, y, CONSTANTS.TERRAIN_LEFT);
+                        this.mapTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_LEFT));
                         break;
                     case CONSTANTS.TERRAIN_CENTER_INDEX:
-                        this.mapTiles[y][x] = this.createTile(x, y, CONSTANTS.TERRAIN_CENTER);
+                        this.mapTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_CENTER));
                         break;
                     case CONSTANTS.TERRAIN_RIGHT_EDGE_INDEX:
-                        this.mapTiles[y][x] = this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT_EDGE);
+                        this.mapTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT_EDGE));
                         break;
                     case CONSTANTS.TERRAIN_LEFT_EDGE_INDEX:
-                        this.mapTiles[y][x] = this.createTile(x, y, CONSTANTS.TERRAIN_LEFT_EDGE);
+                        this.mapTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_LEFT_EDGE));
                         break;
                 }
             }
