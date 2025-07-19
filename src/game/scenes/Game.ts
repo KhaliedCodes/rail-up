@@ -16,7 +16,8 @@ export class Game extends Scene {
     keyA?: Phaser.Input.Keyboard.Key;
     keyS?: Phaser.Input.Keyboard.Key;
     keyD?: Phaser.Input.Keyboard.Key;
-    bulletsPool: Bullet[] = [];
+    p1bulletsPool: Bullet[] = [];
+    p2bulletsPool: Bullet[] = [];
     private pickupGroup: Phaser.Physics.Arcade.Group;
 
     private pickupTimer: Phaser.Time.TimerEvent;
@@ -153,19 +154,44 @@ export class Game extends Scene {
         this.physics.add.overlap(this.player2.player, this.leftTiles, () => {
             this.player2.isInTheMiddle = false;
         })
+
+        for (let i=0; i<10;i++){
+            const bullet1 = new Bullet(this,0,0,CONSTANTS.BULLET);
+            this.p1bulletsPool.push(bullet1);
+            const bullet2 = new Bullet(this,0,0,CONSTANTS.BULLET);
+            this.p2bulletsPool.push(bullet2);
+        }
+
+        this.p1bulletsPool.forEach(bullet1 => {
+            this.p2bulletsPool.forEach(bullet2 => {
+                this.physics.add.overlap(bullet1, bullet2, () => {
+                    bullet1.hide();
+                    bullet2.hide();
+                })
+            })
+        })
+
+        this.p1bulletsPool.forEach(bullet => {
+            this.physics.add.overlap(this.player2.player, bullet, () => {
+            this.player2.player.setPosition(this.player2.spawnpos[0],this.player2.spawnpos[1]);
+            bullet.hide();
+        })
+        })
+        this.p2bulletsPool.forEach(bullet => {
+            this.physics.add.overlap(this.player1.player, bullet, () => {
+            this.player1.player.setPosition(this.player1.spawnpos[0],this.player1.spawnpos[1]);
+            bullet.hide();
+        })
+        })
         this.input?.keyboard?.on('keydown-CTRL', () => {
-            if(!this.player1.isInTheMiddle) return;
-            const bullet = this.player1.shoot(this,this.bulletsPool);
-            if (bullet){
-                this.bulletsPool.push(bullet);
-            }
+            if (!this.player1.isInTheMiddle) return;
+            if (!this.player1.canshoot) return;
+            this.player1.shoot(this,this.p1bulletsPool);
         });
         this.input?.keyboard?.on('keydown-E', () => {
             if (!this.player2.isInTheMiddle) return;
-            const bullet = this.player2.shoot(this,this.bulletsPool);
-            if (bullet){
-                this.bulletsPool.push(bullet);
-            }
+            if (!this.player2.canshoot) return;
+            this.player2.shoot(this,this.p2bulletsPool);
         });
     }
 
