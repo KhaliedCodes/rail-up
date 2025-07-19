@@ -3,6 +3,7 @@ import { Player } from '../objects/Player';
 import { Ground } from '../objects/ground';
 import { TileDataReader } from '../utils/TileDataReader';
 import { CONSTANTS } from '../constants';
+import { Bullet } from '../objects/Bullet';
 
 export class Game extends Scene {
     camera: Phaser.Cameras.Scene2D.Camera;
@@ -15,6 +16,8 @@ export class Game extends Scene {
     keyA?: Phaser.Input.Keyboard.Key;
     keyS?: Phaser.Input.Keyboard.Key;
     keyD?: Phaser.Input.Keyboard.Key;
+    p1bulletsPool: Bullet[] = [];
+    p2bulletsPool: Bullet[] = [];
     private pickupGroup: Phaser.Physics.Arcade.Group;
     private redTurret: Phaser.GameObjects.Image;
     private blueTurret: Phaser.GameObjects.Image;
@@ -93,40 +96,26 @@ export class Game extends Scene {
                     case CONSTANTS.TERRAIN_RIGHT_INDEX:
                         tile = this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT);
                         this.rightTiles.push(tile);
-                        tile.setImmovable(true);
                         break;
                     case CONSTANTS.TERRAIN_LEFT_INDEX:
                         tile = this.createTile(x, y, CONSTANTS.TERRAIN_LEFT);
                         this.leftTiles.push(tile);
-                        tile.setImmovable(true);
                         break;
                     case CONSTANTS.TERRAIN_CENTER_INDEX:
                         tile = this.createTile(x, y, CONSTANTS.TERRAIN_CENTER);
                         this.midTiles.push(tile);
-                        tile.setImmovable(true);
                         break;
                     case CONSTANTS.TERRAIN_RIGHT_EDGE_INDEX:
                         tile = this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT_EDGE);
                         this.midTiles.push(tile);
-                        tile.setImmovable(true);
                         break;
                     case CONSTANTS.TERRAIN_LEFT_EDGE_INDEX:
                         tile = this.createTile(x, y, CONSTANTS.TERRAIN_LEFT_EDGE);
                         this.midTiles.push(tile);
-                        tile.setImmovable(true);
                         break;
                 }
             }
         }
-        this.rightTiles.forEach(tile => {
-            tile.setImmovable(true);
-        })
-        this.leftTiles.forEach(tile => {
-            tile.setImmovable(true);
-        })
-        this.midTiles.forEach(tile => {
-            tile.setImmovable(true)
-        })
 
         this.cursor = this.input?.keyboard?.createCursorKeys();
         this.keyW = this.input?.keyboard?.addKey("W");
@@ -245,6 +234,45 @@ export class Game extends Scene {
         this.physics.add.overlap(this.player2.player, this.leftTiles, () => {
             this.player2.isInTheMiddle = false;
         })
+
+        for (let i=0; i<10;i++){
+            const bullet1 = new Bullet(this,0,0,CONSTANTS.BULLET);
+            this.p1bulletsPool.push(bullet1);
+            const bullet2 = new Bullet(this,0,0,CONSTANTS.BULLET);
+            this.p2bulletsPool.push(bullet2);
+        }
+
+        this.p1bulletsPool.forEach(bullet1 => {
+            this.p2bulletsPool.forEach(bullet2 => {
+                this.physics.add.overlap(bullet1, bullet2, () => {
+                    bullet1.hide();
+                    bullet2.hide();
+                })
+            })
+        })
+
+        this.p1bulletsPool.forEach(bullet => {
+            this.physics.add.overlap(this.player2.player, bullet, () => {
+            this.player2.player.setPosition(this.player2.spawnpos[0],this.player2.spawnpos[1]);
+            bullet.hide();
+        })
+        })
+        this.p2bulletsPool.forEach(bullet => {
+            this.physics.add.overlap(this.player1.player, bullet, () => {
+            this.player1.player.setPosition(this.player1.spawnpos[0],this.player1.spawnpos[1]);
+            bullet.hide();
+        })
+        })
+        this.input?.keyboard?.on('keydown-CTRL', () => {
+            if (!this.player1.isInTheMiddle) return;
+            if (!this.player1.canshoot) return;
+            this.player1.shoot(this,this.p1bulletsPool);
+        });
+        this.input?.keyboard?.on('keydown-E', () => {
+            if (!this.player2.isInTheMiddle) return;
+            if (!this.player2.canshoot) return;
+            this.player2.shoot(this,this.p2bulletsPool);
+        });
     }
 
     update(time: number, delta: number): void {
@@ -430,7 +458,7 @@ export class Game extends Scene {
         player.player.setTint(player === this.player1 ? 0xff1111 : 0x11ff11);
     }
     spawnPlayer() {
-        this.player1 = new Player(this, CONSTANTS.WINDOW_WIDTH - CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.PLAYER_TILE_SIZE / 2, CONSTANTS.PLAYER);
+        this.player1 = new Player(this, CONSTANTS.WINDOW_WIDTH - CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2, CONSTANTS.PLAYER);
         this.player1.player.rotation = Math.PI;
         this.player1.player.tint = 0xff3333;
 
@@ -455,7 +483,7 @@ export class Game extends Scene {
         if (platformTile.body) {
             (platformTile.body as Phaser.Physics.Arcade.Body).setImmovable(true);
         }
-
+        platformTile.setImmovable(true);
         return platformTile;
     }
 

@@ -1,17 +1,22 @@
 import { Scene } from 'phaser';
 import { CONSTANTS } from '../constants';
+import { Bullet } from './Bullet';
 
 export class Player {
     player: Phaser.Physics.Arcade.Sprite;
     speed: number = 160;
     rotationalSpeed: number = 0.05;
+    spawnpos: number[] = [];
     isInTheMiddle: boolean = false;
     pickupActive: boolean = false;
     isCarryingCollectible: boolean = false;
     charges: number = 0;
     maxCharges: number = 5;
+    canshoot: boolean = true;
     constructor(scene: Scene, x: number, y: number, texture: string) {
         this.player = scene.physics.add.sprite(x,y,texture);
+        this.spawnpos.push(x);
+        this.spawnpos.push(y);
         this.player.body?.setCircle(CONSTANTS.PLAYER_TILE_SIZE/8,CONSTANTS.PLAYER_TILE_SIZE/2-CONSTANTS.PLAYER_TILE_SIZE/8,CONSTANTS.PLAYER_TILE_SIZE/2-CONSTANTS.PLAYER_TILE_SIZE/8);
         this.player.setCollideWorldBounds(true);
     }
@@ -32,6 +37,22 @@ export class Player {
         }else{
             this.player.setVelocityX(0);
             this.player.setVelocityY(0);
+        }
+    }
+    shoot(scene: Scene, bulletsPool: Bullet[]){
+        this.canshoot = false;
+        for (const bullet of bulletsPool) {
+            if (!bullet.active){
+                bullet.shoot(scene,this);
+                scene.time.addEvent({
+                    delay: 500,
+                    loop: false,
+                    callback: () => {
+                        this.canshoot = true;
+                    }
+                });
+                return;
+            }
         }
     }
 }
