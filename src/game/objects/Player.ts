@@ -1,0 +1,43 @@
+import { Scene } from 'phaser';
+import { CONSTANTS } from '../constants';
+import { Vector } from 'matter';
+
+export class Player {
+    player: Phaser.Physics.Arcade.Sprite;
+    speed: number = 160;
+    rotationalSpeed: number = 0.02;
+    constructor(scene: Scene, x: number, y: number, texture: string) {
+        this.player = scene.physics.add.sprite(x,y,texture);
+        this.player.body?.setCircle(CONSTANTS.PLAYER_TILE_SIZE/8,CONSTANTS.PLAYER_TILE_SIZE/2-CONSTANTS.PLAYER_TILE_SIZE/8,CONSTANTS.PLAYER_TILE_SIZE/2-CONSTANTS.PLAYER_TILE_SIZE/8);
+        // this.player.body?.setOffset(CONSTANTS.PLAYER_TILE_SIZE/3, CONSTANTS.PLAYER_TILE_SIZE/2);
+        this.player.setCollideWorldBounds(true);
+    }
+    movePlayer(keyup?: Phaser.Input.Keyboard.Key, keydown?: Phaser.Input.Keyboard.Key, keyleft?: Phaser.Input.Keyboard.Key, keyright?: Phaser.Input.Keyboard.Key) {
+        if (keyleft?.isDown) {
+            this.player.rotation -= this.rotationalSpeed;
+            //this.player.setVelocityX(-160);
+            //this.player.flipX = true;
+        }
+        else if (keyright?.isDown) {
+            this.player.rotation += this.rotationalSpeed;
+            //this.player.setVelocityX(160);
+            //this.player.flipX = false;
+        }
+        if (keyup?.isDown) {
+            this.player.setVelocityX(Math.cos(this.player.rotation)*this.speed);
+            this.player.setVelocityY(Math.sin(this.player.rotation)*this.speed);
+        }
+        else if (keydown?.isDown) {
+            this.player.setVelocityX(-Math.cos(this.player.rotation)*this.speed);
+            this.player.setVelocityY(-Math.sin(this.player.rotation)*this.speed);
+        }else{
+            this.player.setVelocityX(0);
+            this.player.setVelocityY(0);
+        }
+        // if (player.player.body?.velocity.x === 0 && player.player.body?.velocity.y === 0){
+        //     player.player.anims.play(playeridle, true);
+        // }else{
+        //     player.player.anims.play(playerrun, true);
+        // }
+    }
+}
