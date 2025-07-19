@@ -34,9 +34,9 @@ export class Controls extends Phaser.Scene {
     // Control Mappings
     const controls = [
       { key1: 'W', action1: 'Move Forward', key2: '↑', action2: 'Move Forward' },
-      { key1: 'A', action1: 'Move Left',    key2: '←', action2: 'Move Left' },
+      { key1: 'A', action1: 'Rotate Left',    key2: '←', action2: 'Rotate Left' },
       { key1: 'S', action1: 'Move Backward',key2: '↓', action2: 'Move Backward' },
-      { key1: 'D', action1: 'Move Right',   key2: '→', action2: 'Move Right' },
+      { key1: 'D', action1: 'Rotate Right',   key2: '→', action2: 'Rotate Right' },
       { key1: 'E', action1: 'Throw',        key2: 'Ctrl', action2: 'Throw' },
     ];
 

@@ -47,6 +47,12 @@ export class Preloader extends Scene
         this.load.image('spark', '/PNG/Default size/towerDefense_tile275.png');
         this.load.image('plane', '/PNG/Retina/towerDefense_tile271.png');
         this.load.audio('bgm', '/Music/Music_by_Ievgen_Poltavskyi_from_Pixabay.mp3');
+        this.load.image('railgun_red', '/PNG/Default size/towerDefense_tile250.png');
+        this.load.image('railgun_blue', '/PNG/Default size/towerDefense_tile249.png');
+        this.load.image('charge_empty', '/PNG/Default size/towerDefense_tile015.png');
+        this.load.image('charge_full', '/PNG/Default size/towerDefense_tile018.png');
+        this.load.image('target_x', '/PNG/Default size/towerDefense_tile017.png');
+        this.load.image('railgun_attack', '/PNG/Default size/towerDefense_tile133.png');
     }
 
     create ()

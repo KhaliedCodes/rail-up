@@ -16,6 +16,14 @@ export class Game extends Scene {
     keyS?: Phaser.Input.Keyboard.Key;
     keyD?: Phaser.Input.Keyboard.Key;
     private pickupGroup: Phaser.Physics.Arcade.Group;
+    private redTurret: Phaser.GameObjects.Image;
+    private blueTurret: Phaser.GameObjects.Image;
+    private redTarget: Phaser.GameObjects.Image;
+    private blueTarget: Phaser.GameObjects.Image;
+    private redChargeIndicators: Phaser.GameObjects.Image[] = [];
+    private blueChargeIndicators: Phaser.GameObjects.Image[] = [];
+    private attackAnimation?: Phaser.GameObjects.Image;
+    private gameEnded: boolean = false;
 
     private pickupTimer: Phaser.Time.TimerEvent;
     private pickupSpawnPoints: { x: number, y: number }[] = [];
@@ -127,6 +135,78 @@ export class Game extends Scene {
         this.keyD = this.input?.keyboard?.addKey("D");
 
         this.spawnPlayer();
+
+        this.redTurret = this.add.image(
+            CONSTANTS.WINDOW_WIDTH - CONSTANTS.TERRAIN_TILE_SIZE * 2,
+            CONSTANTS.WINDOW_HEIGHT / 2,
+            'railgun_red'
+        )
+        .setDepth(1)
+        .setAngle(-90) // Rotate 180 degrees to face left
+        .setScale(1.2) // Increase size by 20%
+        .setOrigin(0.5, 0.5); // Ensure rotation and scaling happens from center
+
+        this.blueTurret = this.add.image(
+            CONSTANTS.TERRAIN_TILE_SIZE * 2,
+            CONSTANTS.WINDOW_HEIGHT / 2,
+            'railgun_blue'
+        )
+        .setDepth(1)
+        .setAngle(90) // Face right (explicitly set for clarity)
+        .setScale(1.2) // Increase size by 20%
+        .setOrigin(0.5, 0.5);
+
+        // Add target X markers
+        this.redTarget = this.add.image(
+            CONSTANTS.WINDOW_WIDTH - CONSTANTS.TERRAIN_TILE_SIZE * 2,
+            CONSTANTS.WINDOW_HEIGHT / 2 + 100,
+            'target_x'
+        ).setInteractive();
+
+        this.blueTarget = this.add.image(
+            CONSTANTS.TERRAIN_TILE_SIZE * 2,
+            CONSTANTS.WINDOW_HEIGHT / 2 + 100,
+            'target_x'
+        ).setInteractive();
+
+        // Create vertical charge indicators with more spacing
+        for (let i = 0; i < 5; i++) {
+            const redCharge = this.add.image(
+                this.redTurret.x + 65,  // Fixed X position (left of turret)
+                this.redTurret.y - 100 + (i * 50),  // Vertical spacing (30px apart)
+                'charge_empty'
+            );
+            this.redChargeIndicators.push(redCharge);
+
+            const blueCharge = this.add.image(
+                this.blueTurret.x -65,  // Fixed X position (right of turret)
+                this.blueTurret.y - 100 + (i * 50),  // Vertical spacing (30px apart)
+                'charge_empty'
+            );
+            this.blueChargeIndicators.push(blueCharge);
+        }
+
+        // Enable physics for turrets
+        this.physics.add.existing(this.redTurret, true); // true = static body
+        this.physics.add.existing(this.blueTurret, true);
+
+        // Add colliders to prevent players passing through
+        this.physics.add.collider(this.player1.player, this.redTurret);
+        this.physics.add.collider(this.player1.player, this.blueTurret);
+        this.physics.add.collider(this.player2.player, this.redTurret);
+        this.physics.add.collider(this.player2.player, this.blueTurret);
+
+        // Add overlap checks for targets
+        this.physics.add.overlap(this.player1.player, this.redTarget, () => {
+            this.player1.isAtTurret = true;
+            this.tryActivateTurret(this.player1);
+        });
+
+        this.physics.add.overlap(this.player2.player, this.blueTarget, () => {
+            this.player2.isAtTurret = true;
+            this.tryActivateTurret(this.player2);
+        });
+
         this.physics.add.overlap(
             this.player1.player,
             this.pickupGroup,
@@ -170,6 +250,24 @@ export class Game extends Scene {
     update(time: number, delta: number): void {
         this.player1.movePlayer(this.cursor?.up, this.cursor?.down, this.cursor?.left, this.cursor?.right);
         this.player2.movePlayer(this.keyW, this.keyS, this.keyA, this.keyD);
+
+        const p1AtTarget = Phaser.Math.Distance.Between(
+            this.player1.player.x, this.player1.player.y,
+            this.redTarget.x, this.redTarget.y
+        ) < 50;
+
+        const p2AtTarget = Phaser.Math.Distance.Between(
+            this.player2.player.x, this.player2.player.y,
+            this.blueTarget.x, this.blueTarget.y
+        ) < 50;
+
+        // Try to add charges if at target with collectible
+        if (p1AtTarget && this.player1.isCarryingCollectible) {
+            this.tryAddCharge(this.player1);
+        }
+        if (p2AtTarget && this.player2.isCarryingCollectible) {
+            this.tryAddCharge(this.player2);
+        }
     }
 
 
@@ -228,28 +326,108 @@ export class Game extends Scene {
         }, [], this);
     }
 
+    private tryActivateTurret(player: Player) {
+        if (player.charges >= player.maxCharges) {
+            this.executeAttack(player);
+        }
+    }
 
+    private tryAddCharge(player: Player) {
+        // Only add charge if carrying collectible and at target
+        if (!player.isCarryingCollectible) return;
+
+        // Consume the collectible
+        player.isCarryingCollectible = false;
+
+        
+        // Add charge
+        player.charges = Math.min(player.charges + 1, player.maxCharges);
+        this.updateChargeIndicators(player);
+
+        // Check for win condition
+        if (player.charges >= player.maxCharges) {
+            this.executeAttack(player);
+        }
+    }
+
+    private executeAttack(player: Player) {
+        if (this.gameEnded) return;
+
+        this.gameEnded = true;
+
+        // Show attack animation
+        const targetX = player === this.player1 ? 
+            this.blueTurret.x : this.redTurret.x;
+
+        this.attackAnimation = this.add.image(
+            player === this.player1 ? this.redTurret.x : this.blueTurret.x,
+            player === this.player1 ? this.redTurret.y : this.blueTurret.y,
+            'railgun_attack'
+        )
+        .setDepth(10)
+        .setTint(player === this.player1 ? 0xff3333 : 0x33ff33); // Tint based on player
+
+        // Animate the attack
+        this.tweens.add({
+            targets: this.attackAnimation,
+            x: targetX,
+            duration: 500,
+            ease: 'Power1',
+            onComplete: () => {
+                // Show win condition
+                const winnerText = this.add.text(
+                    this.cameras.main.centerX,
+                    this.cameras.main.centerY,
+                    player === this.player1 ? 'Red Player Wins!' : 'Blue Player Wins!',
+                    { 
+                        fontSize: '64px', 
+                        color: player === this.player1 ? '#ff3333' : '#33ff33',
+                        stroke: '#000000',
+                        strokeThickness: 8
+                    }
+                ).setOrigin(0.5);
+
+                // Restart game after delay
+                this.time.delayedCall(3000, () => {
+                    this.scene.restart();
+                });
+            }
+        });
+        const clickText = this.add.text(
+                this.cameras.main.centerX,
+                this.cameras.main.centerY + 50,
+                'Click to return to Main Menu',
+                {
+                    fontSize: '32px',
+                    color: '#ffffff',
+                    stroke: '#000000',
+                    strokeThickness: 4
+                }
+            ).setOrigin(0.5);
+
+            // 🔙 Return to Main Menu on click
+            this.input.once('pointerup', () => {
+                this.scene.start('MainMenu');
+            });
+
+            // Still keep the automatic restart after delay as fallback
+            this.time.delayedCall(10000, () => {
+                this.scene.start('MainMenu');
+            });
+    }
 
     private collectPickup(player: Player, pickup: Phaser.Physics.Arcade.Image): void {
-        // Only collect if we don't already have an active pickup
-        if (player.pickupActive || !pickup.active) return;
+        // Only collect if not already carrying one
+        if (player.isCarryingCollectible || !pickup.active) return;
 
         // Remove the pickup
         pickup.disableBody(true, true);
 
-        // Set pickup as active
-        player.pickupActive = true;
-
-
-        // Reset any existing timer
-        if (this.pickupTimer) {
-            this.pickupTimer.destroy();
-        }
-
-        // Set timer to reset after 15 seconds
-        this.pickupTimer = this.time.delayedCall(15000, () => {
-            player.pickupActive = false; // Allow new pickups to be collected
-        }, [], this);
+        // Mark player as carrying collectible
+        player.isCarryingCollectible = true;
+        
+        // Visual feedback - maybe tint the player
+        player.player.setTint(player === this.player1 ? 0xff1111 : 0x11ff11);
     }
     spawnPlayer() {
         this.player1 = new Player(this, CONSTANTS.WINDOW_WIDTH - CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.PLAYER_TILE_SIZE / 2, CONSTANTS.PLAYER);
@@ -258,7 +436,7 @@ export class Game extends Scene {
 
         // Spawn Player 2
         this.player2 = new Player(this, CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.PLAYER_TILE_SIZE / 2, CONSTANTS.PLAYER);
-        this.player2.player.tint = 0x3333ff;
+        this.player2.player.tint = 0x33ff33;
     }
     createTile(x: number, y: number, tileTexture: string, tintColor?: number) {
         const tileX = x * CONSTANTS.TERRAIN_TILE_SIZE + CONSTANTS.TERRAIN_TILE_SIZE / 2;
@@ -281,5 +459,16 @@ export class Game extends Scene {
         return platformTile;
     }
 
-
+    private updateChargeIndicators(player: Player) {
+        const indicators = player === this.player1 ? 
+            this.redChargeIndicators : this.blueChargeIndicators;
+            
+        indicators.forEach((indicator, index) => {
+            if (index < player.charges) {
+                indicator.setTexture('charge_full');
+            } else {
+                indicator.setTexture('charge_empty');
+            }
+        });
+    }
 }

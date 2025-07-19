@@ -7,6 +7,9 @@ export class Player {
     rotationalSpeed: number = 0.05;
     isInTheMiddle: boolean = false;
     pickupActive: boolean = false;
+    isCarryingCollectible: boolean = false;
+    charges: number = 0;
+    maxCharges: number = 5;
     constructor(scene: Scene, x: number, y: number, texture: string) {
         this.player = scene.physics.add.sprite(x,y,texture);
         this.player.body?.setCircle(CONSTANTS.PLAYER_TILE_SIZE/8,CONSTANTS.PLAYER_TILE_SIZE/2-CONSTANTS.PLAYER_TILE_SIZE/8,CONSTANTS.PLAYER_TILE_SIZE/2-CONSTANTS.PLAYER_TILE_SIZE/8);
