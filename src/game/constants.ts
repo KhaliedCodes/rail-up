@@ -1,5 +1,25 @@
 export const CONSTANTS = {
-    WINDOW_WIDTH: 1089,
-    WINDOW_HEIGHT: 792,
+    WINDOW_WIDTH: 1088,
+    WINDOW_HEIGHT: 768,
+    TERRAIN_TILE_SIZE: 64,
+    TERRAIN_RIGHT: "terrain-right",
+    TERRAIN_LEFT: "terrain-left",
+    TERRAIN_CENTER: "terrain-center",
+    TERRAIN_RIGHT_EDGE: "terrain-right-edge",
+    TERRAIN_LEFT_EDGE: "terrain-left-edge",
+    TERRAIN_RIGHT_INDEX: 1,
+    TERRAIN_LEFT_INDEX: 2,
+    TERRAIN_CENTER_INDEX: 3,
+    TERRAIN_RIGHT_EDGE_INDEX: 4,
+    TERRAIN_LEFT_EDGE_INDEX: 5,
+    TERRAIN_RIGHT_TEXTURE: 'PNG/Default size/towerDefense_tile129.png',
+    TERRAIN_RIGHT_EDGE_TEXTURE: 'PNG/Default size/towerDefense_tile161.png',
+    TERRAIN_LEFT_TEXTURE: 'PNG/Default size/towerDefense_tile050.png',
+    TERRAIN_LEFT_EDGE_TEXTURE: 'PNG/Default size/towerDefense_tile168.png',
+
+    TERRAIN_CENTER_TEXTURE: 'PNG/Default size/towerDefense_tile198.png',
+
+    TILE_DATA: "tileData",
+    TILE_DATA_PATH: "tileData.tmj",
 
 }
