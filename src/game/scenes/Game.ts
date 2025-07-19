@@ -26,23 +26,34 @@ export class Game extends Scene {
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x00ff00)
         const data = TileDataReader.readTileData(this.cache.text.get(CONSTANTS.TILE_DATA));
+        let tile : Ground;
         for (let y = 0; y < data.length; y++) {
             for (let x = 0; x < data[y].length; x++) {
                 switch (data[y][x]) {
                     case CONSTANTS.TERRAIN_RIGHT_INDEX:
-                        this.rightTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT));
+                        tile = this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT);
+                        this.rightTiles.push(tile);
+                        tile.setImmovable(true);
                         break;
                     case CONSTANTS.TERRAIN_LEFT_INDEX:
-                        this.leftTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_LEFT));
+                        tile = this.createTile(x, y, CONSTANTS.TERRAIN_LEFT);
+                        this.leftTiles.push(tile);
+                        tile.setImmovable(true);
                         break;
                     case CONSTANTS.TERRAIN_CENTER_INDEX:
-                        this.midTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_CENTER));
+                        tile = this.createTile(x, y, CONSTANTS.TERRAIN_CENTER);
+                        this.midTiles.push(tile);
+                        tile.setImmovable(true);
                         break;
                     case CONSTANTS.TERRAIN_RIGHT_EDGE_INDEX:
-                        this.midTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT_EDGE));
+                        tile = this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT_EDGE);
+                        this.midTiles.push(tile);
+                        tile.setImmovable(true);
                         break;
                     case CONSTANTS.TERRAIN_LEFT_EDGE_INDEX:
-                        this.midTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_LEFT_EDGE));
+                        tile = this.createTile(x, y, CONSTANTS.TERRAIN_LEFT_EDGE);
+                        this.midTiles.push(tile);
+                        tile.setImmovable(true);
                         break;
                 }
             }
