@@ -6,6 +6,7 @@ export class Player {
     speed: number = 160;
     rotationalSpeed: number = 0.05;
     isInTheMiddle: boolean = false;
+    pickupActive: boolean = false;
     constructor(scene: Scene, x: number, y: number, texture: string) {
         this.player = scene.physics.add.sprite(x,y,texture);
         this.player.body?.setCircle(CONSTANTS.PLAYER_TILE_SIZE/8,CONSTANTS.PLAYER_TILE_SIZE/2-CONSTANTS.PLAYER_TILE_SIZE/8,CONSTANTS.PLAYER_TILE_SIZE/2-CONSTANTS.PLAYER_TILE_SIZE/8);
