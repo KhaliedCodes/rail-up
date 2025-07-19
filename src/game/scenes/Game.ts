@@ -66,14 +66,11 @@ export class Game extends Scene {
     spawnPlayer() {
         this.player1 = new Player(this, CONSTANTS.WINDOW_WIDTH - CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.PLAYER_TILE_SIZE / 2 , CONSTANTS.PLAYER);
         this.player1.player.rotation = Math.PI;
-        //this.player1.player.anims.play(CONSTANTS.PLAYER_IDLE_OUTLINE);
-        //this.player1.player.flipX = true;
-        this.player1.player.tint = 0xff8888; // Change color for player 1
+        this.player1.player.tint = 0xff8888;
 
          // Spawn Player 2
         this.player2 = new Player(this, CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.PLAYER_TILE_SIZE / 2 , CONSTANTS.PLAYER);
-        //this.player2.player.anims.play(CONSTANTS.PLAYER_IDLE);
-        this.player2.player.tint = 0x8888ff; // Change color for player 2
+        this.player2.player.tint = 0x8888ff;
     }
     createTile(x: number, y: number, tileTexture: string, tintColor?: number) {
         const tileX = x * CONSTANTS.TERRAIN_TILE_SIZE + CONSTANTS.TERRAIN_TILE_SIZE / 2;
