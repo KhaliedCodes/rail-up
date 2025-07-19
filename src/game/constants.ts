@@ -21,5 +21,6 @@ export const CONSTANTS = {
 
     TILE_DATA: "tileData",
     TILE_DATA_PATH: "tileData.tmj",
-
+    PICKUPS_PATH: 'PNG/Default size/towerDefense_tile022.png',
+    PICKUPS: 'pickups',
 }
