@@ -41,6 +41,11 @@ export class Preloader extends Scene
         this.load.image(CONSTANTS.TERRAIN_CENTER, CONSTANTS.TERRAIN_CENTER_TEXTURE);
         this.load.image(CONSTANTS.TERRAIN_RIGHT_EDGE, CONSTANTS.TERRAIN_RIGHT_EDGE_TEXTURE);
         this.load.image(CONSTANTS.TERRAIN_LEFT_EDGE, CONSTANTS.TERRAIN_LEFT_EDGE_TEXTURE);
+        this.load.image('floorTile', '/PNG/Default size/towerDefense_tile236.png');
+        this.load.image('turret', '/PNG/Default size/towerDefense_tile250.png');
+        this.load.image('spark', '/PNG/Default size/towerDefense_tile275.png');
+        this.load.image('plane', '/PNG/Retina/towerDefense_tile271.png');
+        this.load.audio('bgm', '/Music/Music_by_Ievgen_Poltavskyi_from_Pixabay.mp3');
     }
 
     create ()
@@ -49,6 +54,24 @@ export class Preloader extends Scene
         //  For example, you can define global animations here, so we can use them in other scenes.
 
         //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
+        let music = this.sound.get('bgm');
+
+        if (!music) {
+            music = this.sound.add('bgm', {
+                loop: true,
+                volume: 0.3  // fallback default
+            });
+
+            // 🔁 Load saved volume/mute
+            const savedVolume = parseFloat(localStorage.getItem('estlem_music_volume') || '0.3');
+            const savedMuted = localStorage.getItem('estlem_music_muted') === 'true';
+
+            music.setVolume(savedVolume);
+            music.setMute(savedMuted);
+
+            music.play();
+        }
+
         this.scene.start('MainMenu');
     }
 }
