@@ -36,6 +36,7 @@ export class Preloader extends Scene
 
         this.load.image('logo', 'logo.png');
         this.load.image(CONSTANTS.PICKUPS, CONSTANTS.PICKUPS_PATH);
+        this.load.image(CONSTANTS.BULLET, CONSTANTS.BULLET_TEXTURE_PATH);
         this.load.text(CONSTANTS.TILE_DATA, CONSTANTS.TILE_DATA_PATH);
         this.load.image(CONSTANTS.TERRAIN_RIGHT, CONSTANTS.TERRAIN_RIGHT_TEXTURE);
         this.load.image(CONSTANTS.TERRAIN_LEFT, CONSTANTS.TERRAIN_LEFT_TEXTURE);

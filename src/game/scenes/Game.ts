@@ -3,6 +3,7 @@ import { Player } from '../objects/Player';
 import { Ground } from '../objects/ground';
 import { TileDataReader } from '../utils/TileDataReader';
 import { CONSTANTS } from '../constants';
+import { Bullet } from '../objects/Bullet';
 
 export class Game extends Scene {
     camera: Phaser.Cameras.Scene2D.Camera;
@@ -15,6 +16,7 @@ export class Game extends Scene {
     keyA?: Phaser.Input.Keyboard.Key;
     keyS?: Phaser.Input.Keyboard.Key;
     keyD?: Phaser.Input.Keyboard.Key;
+    bulletsPool: Bullet[] = [];
     private pickupGroup: Phaser.Physics.Arcade.Group;
 
     private pickupTimer: Phaser.Time.TimerEvent;
@@ -85,40 +87,26 @@ export class Game extends Scene {
                     case CONSTANTS.TERRAIN_RIGHT_INDEX:
                         tile = this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT);
                         this.rightTiles.push(tile);
-                        tile.setImmovable(true);
                         break;
                     case CONSTANTS.TERRAIN_LEFT_INDEX:
                         tile = this.createTile(x, y, CONSTANTS.TERRAIN_LEFT);
                         this.leftTiles.push(tile);
-                        tile.setImmovable(true);
                         break;
                     case CONSTANTS.TERRAIN_CENTER_INDEX:
                         tile = this.createTile(x, y, CONSTANTS.TERRAIN_CENTER);
                         this.midTiles.push(tile);
-                        tile.setImmovable(true);
                         break;
                     case CONSTANTS.TERRAIN_RIGHT_EDGE_INDEX:
                         tile = this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT_EDGE);
                         this.midTiles.push(tile);
-                        tile.setImmovable(true);
                         break;
                     case CONSTANTS.TERRAIN_LEFT_EDGE_INDEX:
                         tile = this.createTile(x, y, CONSTANTS.TERRAIN_LEFT_EDGE);
                         this.midTiles.push(tile);
-                        tile.setImmovable(true);
                         break;
                 }
             }
         }
-        this.rightTiles.forEach(tile => {
-            tile.setImmovable(true);
-        })
-        this.leftTiles.forEach(tile => {
-            tile.setImmovable(true);
-        })
-        this.midTiles.forEach(tile => {
-            tile.setImmovable(true)
-        })
 
         this.cursor = this.input?.keyboard?.createCursorKeys();
         this.keyW = this.input?.keyboard?.addKey("W");
@@ -165,6 +153,12 @@ export class Game extends Scene {
         this.physics.add.overlap(this.player2.player, this.leftTiles, () => {
             this.player2.isInTheMiddle = false;
         })
+        this.input?.keyboard?.on('keydown-CTRL', () => {
+            this.player1.shoot(this,this.bulletsPool);
+        });
+        this.input?.keyboard?.on('keydown-E', () => {
+            this.player2.shoot(this,this.bulletsPool);
+        });
     }
 
     update(time: number, delta: number): void {
@@ -252,12 +246,12 @@ export class Game extends Scene {
         }, [], this);
     }
     spawnPlayer() {
-        this.player1 = new Player(this, CONSTANTS.WINDOW_WIDTH - CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.PLAYER_TILE_SIZE / 2, CONSTANTS.PLAYER);
+        this.player1 = new Player(this, CONSTANTS.WINDOW_WIDTH - CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2, CONSTANTS.PLAYER);
         this.player1.player.rotation = Math.PI;
         this.player1.player.tint = 0xff3333;
 
         // Spawn Player 2
-        this.player2 = new Player(this, CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.PLAYER_TILE_SIZE / 2, CONSTANTS.PLAYER);
+        this.player2 = new Player(this, CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2, CONSTANTS.PLAYER);
         this.player2.player.tint = 0x3333ff;
     }
     createTile(x: number, y: number, tileTexture: string, tintColor?: number) {
@@ -277,7 +271,7 @@ export class Game extends Scene {
         if (platformTile.body) {
             (platformTile.body as Phaser.Physics.Arcade.Body).setImmovable(true);
         }
-
+        platformTile.setImmovable(true);
         return platformTile;
     }
 

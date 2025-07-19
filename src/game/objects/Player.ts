@@ -1,5 +1,6 @@
 import { Scene } from 'phaser';
 import { CONSTANTS } from '../constants';
+import { Bullet } from './Bullet';
 
 export class Player {
     player: Phaser.Physics.Arcade.Sprite;
@@ -30,5 +31,14 @@ export class Player {
             this.player.setVelocityX(0);
             this.player.setVelocityY(0);
         }
+    }
+    shoot(scene: Scene, bulletsPool: Bullet[]){
+        for (const bullet of bulletsPool) {
+            if (!bullet.isActive){
+                bullet.shoot(scene,this);
+                return;
+            }
+        }
+        bulletsPool.push(new Bullet(scene,this.player.x,this.player.y,CONSTANTS.BULLET,this));
     }
 }
