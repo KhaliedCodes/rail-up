@@ -1,9 +1,10 @@
 import { Scene } from 'phaser';
 import { Player } from '../objects/Player';
+import { Ground } from '../objects/ground';
+import { TileDataReader } from '../utils/TileDataReader';
 import { CONSTANTS } from '../constants';
 
-export class Game extends Scene
-{
+export class Game extends Scene {
     camera: Phaser.Cameras.Scene2D.Camera;
     background: Phaser.GameObjects.Image;
     msg_text : Phaser.GameObjects.Text;
@@ -14,16 +15,38 @@ export class Game extends Scene
     keyA?: Phaser.Input.Keyboard.Key;
     keyS?: Phaser.Input.Keyboard.Key;
     keyD?: Phaser.Input.Keyboard.Key;
+    msg_text: Phaser.GameObjects.Text;
 
-    constructor ()
-    {
+    constructor() {
         super('Game');
     }
 
-    create ()
-    {
+    create() {
         this.camera = this.cameras.main;
-        this.camera.setBackgroundColor(0x00ff00);
+        this.camera.setBackgroundColor(0x00ff00)
+        const data = TileDataReader.readTileData(this.cache.text.get(CONSTANTS.TILE_DATA));
+        for (let y = 0; y < data.length; y++) {
+            for (let x = 0; x < data[y].length; x++) {
+                switch (data[y][x]) {
+                    case CONSTANTS.TERRAIN_RIGHT_INDEX: 
+                        this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT);
+                        break;
+                    case CONSTANTS.TERRAIN_LEFT_INDEX:
+                        this.createTile(x, y, CONSTANTS.TERRAIN_LEFT);
+                        break;
+                    case CONSTANTS.TERRAIN_CENTER_INDEX:
+                        this.createTile(x, y, CONSTANTS.TERRAIN_CENTER);
+                        break;
+                    case CONSTANTS.TERRAIN_RIGHT_EDGE_INDEX:
+                        this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT_EDGE);
+                        break;
+                    case CONSTANTS.TERRAIN_LEFT_EDGE_INDEX:
+                        this.createTile(x, y, CONSTANTS.TERRAIN_LEFT_EDGE);
+                        break;
+                }
+            }
+        }
+    }
 
         
         
@@ -65,5 +88,14 @@ export class Game extends Scene
         this.player2 = new Player(this, CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT - CONSTANTS.TERRAIN_TILE_SIZE - CONSTANTS.PLAYER_TILE_SIZE / 2 , CONSTANTS.PLAYER);
         //this.player2.player.anims.play(CONSTANTS.PLAYER_IDLE);
         this.player2.player.tint = 0x8888ff; // Change color for player 2
+    createTile(x: number, y: number, tileTexture: string, tintColor?: number) {
+        const tileX = x * CONSTANTS.TERRAIN_TILE_SIZE + CONSTANTS.TERRAIN_TILE_SIZE / 2;
+        const tileY = y * CONSTANTS.TERRAIN_TILE_SIZE + CONSTANTS.TERRAIN_TILE_SIZE / 2;
+        const platformTile = new Ground(this, tileX, tileY, tileTexture);
+        if (tintColor) {
+            platformTile.setTint(tintColor);
+        }
+        this.physics.add.existing(platformTile);
+        this.add.existing(platformTile);
     }
 }
