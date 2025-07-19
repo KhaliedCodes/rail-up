@@ -1,6 +1,5 @@
 import { Scene } from 'phaser';
 import { CONSTANTS } from '../constants';
-import { Vector } from 'matter';
 
 export class Player {
     player: Phaser.Physics.Arcade.Sprite;
