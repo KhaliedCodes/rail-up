@@ -4,7 +4,7 @@ export const CONSTANTS = {
     PLAYER_TEXTURE_PATH: 'PNG/Default size/towerDefense_tile245.png',
     PLAYER_IDLE: 'playerIdle',
     PLAYER_RUN: 'playerRun',
-    WINDOW_WIDTH: 1024,
+    WINDOW_WIDTH: 17*64,
     WINDOW_HEIGHT: 12*64,
     TERRAIN_TILE_SIZE: 64,
     TERRAIN_RIGHT: "terrain-right",
