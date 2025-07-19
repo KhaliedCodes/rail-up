@@ -4,7 +4,7 @@ import { CONSTANTS } from '../constants';
 export class Player {
     player: Phaser.Physics.Arcade.Sprite;
     speed: number = 160;
-    rotationalSpeed: number = 0.02;
+    rotationalSpeed: number = 0.05;
     isInTheMiddle: boolean = false;
     constructor(scene: Scene, x: number, y: number, texture: string) {
         this.player = scene.physics.add.sprite(x,y,texture);

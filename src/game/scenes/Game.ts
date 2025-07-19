@@ -57,10 +57,6 @@ export class Game extends Scene {
             tile.setImmovable(true)
         })
         
-        
-        this.background = this.add.image(512, 384, 'background');
-        this.background.setAlpha(0.5);
-        
         this.cursor = this.input?.keyboard?.createCursorKeys();
         this.keyW = this.input?.keyboard?.addKey("W");
         this.keyA = this.input?.keyboard?.addKey("A");
@@ -92,11 +88,11 @@ export class Game extends Scene {
     spawnPlayer() {
         this.player1 = new Player(this, CONSTANTS.WINDOW_WIDTH - CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.PLAYER_TILE_SIZE / 2 , CONSTANTS.PLAYER);
         this.player1.player.rotation = Math.PI;
-        this.player1.player.tint = 0xff8888;
+        this.player1.player.tint = 0xff3333;
 
          // Spawn Player 2
         this.player2 = new Player(this, CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.PLAYER_TILE_SIZE / 2 , CONSTANTS.PLAYER);
-        this.player2.player.tint = 0x8888ff;
+        this.player2.player.tint = 0x3333ff;
     }
     createTile(x: number, y: number, tileTexture: string, tintColor?: number) {
         const tileX = x * CONSTANTS.TERRAIN_TILE_SIZE + CONSTANTS.TERRAIN_TILE_SIZE / 2;
