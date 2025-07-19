@@ -32,13 +32,13 @@ export class Player {
             this.player.setVelocityY(0);
         }
     }
-    shoot(scene: Scene, bulletsPool: Bullet[]){
+    shoot(scene: Scene, bulletsPool: Bullet[]) : Bullet | null{
         for (const bullet of bulletsPool) {
-            if (!bullet.isActive){
+            if (!bullet.bullet.active){
                 bullet.shoot(scene,this);
-                return;
+                return null;
             }
         }
-        bulletsPool.push(new Bullet(scene,this.player.x,this.player.y,CONSTANTS.BULLET,this));
+        return new Bullet(scene,this.player.x,this.player.y,CONSTANTS.BULLET,this);
     }
 }

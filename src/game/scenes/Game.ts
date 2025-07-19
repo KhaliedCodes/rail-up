@@ -154,10 +154,18 @@ export class Game extends Scene {
             this.player2.isInTheMiddle = false;
         })
         this.input?.keyboard?.on('keydown-CTRL', () => {
-            this.player1.shoot(this,this.bulletsPool);
+            if(!this.player1.isInTheMiddle) return;
+            const bullet = this.player1.shoot(this,this.bulletsPool);
+            if (bullet){
+                this.bulletsPool.push(bullet);
+            }
         });
         this.input?.keyboard?.on('keydown-E', () => {
-            this.player2.shoot(this,this.bulletsPool);
+            if (!this.player2.isInTheMiddle) return;
+            const bullet = this.player2.shoot(this,this.bulletsPool);
+            if (bullet){
+                this.bulletsPool.push(bullet);
+            }
         });
     }
 
