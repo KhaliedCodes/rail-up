@@ -15,7 +15,6 @@ export class Game extends Scene {
     keyA?: Phaser.Input.Keyboard.Key;
     keyS?: Phaser.Input.Keyboard.Key;
     keyD?: Phaser.Input.Keyboard.Key;
-    msg_text: Phaser.GameObjects.Text;
 
     constructor() {
         super('Game');
@@ -46,25 +45,11 @@ export class Game extends Scene {
                 }
             }
         }
-    }
-
         
         
         this.background = this.add.image(512, 384, 'background');
         this.background.setAlpha(0.5);
         
-        this.msg_text = this.add.text(512, 384, 'Make something fun!\nand share it with us:\nsupport@phaser.io', {
-            fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 8,
-            align: 'center'
-        });
-        this.msg_text.setOrigin(0.5);
-        
-        this.input.once('pointerdown', () => {
-            
-            this.scene.start('GameOver');
-            
-        });
         this.cursor = this.input?.keyboard?.createCursorKeys();
         this.keyW = this.input?.keyboard?.addKey("W");
         this.keyA = this.input?.keyboard?.addKey("A");
@@ -88,6 +73,7 @@ export class Game extends Scene {
         this.player2 = new Player(this, CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT - CONSTANTS.TERRAIN_TILE_SIZE - CONSTANTS.PLAYER_TILE_SIZE / 2 , CONSTANTS.PLAYER);
         //this.player2.player.anims.play(CONSTANTS.PLAYER_IDLE);
         this.player2.player.tint = 0x8888ff; // Change color for player 2
+    }
     createTile(x: number, y: number, tileTexture: string, tintColor?: number) {
         const tileX = x * CONSTANTS.TERRAIN_TILE_SIZE + CONSTANTS.TERRAIN_TILE_SIZE / 2;
         const tileY = y * CONSTANTS.TERRAIN_TILE_SIZE + CONSTANTS.TERRAIN_TILE_SIZE / 2;
