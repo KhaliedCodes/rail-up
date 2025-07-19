@@ -132,7 +132,7 @@ this.pickupSpawnPoints = [
             this.pickupGroup,
             (player, pickup) => {
                 this.collectPickup(
-                    player as Phaser.Physics.Arcade.Sprite,
+                    this.player1,
                     pickup as Phaser.Physics.Arcade.Image
                 );
             },
@@ -144,7 +144,7 @@ this.pickupSpawnPoints = [
             this.pickupGroup,
             (player, pickup) => {
                 this.collectPickup(
-                    player as Phaser.Physics.Arcade.Sprite,
+                    this.player2,
                     pickup as Phaser.Physics.Arcade.Image
                 );
             },
