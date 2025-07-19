@@ -1,20 +1,27 @@
 import { Scene } from 'phaser';
+import { Player } from '../objects/Player';
 import { Ground } from '../objects/ground';
 import { TileDataReader } from '../utils/TileDataReader';
 import { CONSTANTS } from '../constants';
 
 export class Game extends Scene {
-    private camera: Phaser.Cameras.Scene2D.Camera;
-    private background: Phaser.GameObjects.Image;
-    private msg_text: Phaser.GameObjects.Text;
+    camera: Phaser.Cameras.Scene2D.Camera;
+    background: Phaser.GameObjects.Image;
+    msg_text : Phaser.GameObjects.Text;
+    player1: Player;
+    player2: Player;
+    cursor?: Phaser.Types.Input.Keyboard.CursorKeys;
+    keyW?: Phaser.Input.Keyboard.Key;
+    keyA?: Phaser.Input.Keyboard.Key;
+    keyS?: Phaser.Input.Keyboard.Key;
+    keyD?: Phaser.Input.Keyboard.Key;
     private pickupGroup: Phaser.Physics.Arcade.Group;
-    private pickupActive: boolean = false;
-    private player: Phaser.Physics.Arcade.Sprite;
-    private playerOutline: Phaser.GameObjects.Graphics;
+    
     private pickupTimer: Phaser.Time.TimerEvent;
-    private mapTiles: Ground[] = [];
-    private pickupSpawnPoints: {x: number, y: number}[] = []; // Window positions
-
+    private pickupSpawnPoints: {x: number, y: number}[] = []; 
+    midTiles: Ground[]= [];
+    rightTiles: Ground[]= [];
+    leftTiles: Ground[]= []
     constructor() {
         super({ key: 'Game' });
     }
@@ -38,22 +45,10 @@ this.pickupSpawnPoints = [
             return;
         }
 
-        const data = TileDataReader.readTileData(tileData);
+        
 
         // Create player with proper type checking
-        this.player = this.physics.add.sprite(400, 500, 'player');
-        if (!this.player) {
-            console.error('Player sprite could not be created');
-            return;
-        }
-
-        this.player.setCollideWorldBounds(true);
-        this.player.setBounce(0.2);
-        this.player.setDrag(100, 100);
-
-        // Create player outline
-        this.playerOutline = this.add.graphics();
-        this.drawPlayerOutline(0xffffff); // White outline by default
+        
 
         // Create pickup group with proper physics
         this.pickupGroup = this.physics.add.group({
@@ -62,19 +57,7 @@ this.pickupSpawnPoints = [
         });
 
         // Improved collision detection
-        this.physics.add.overlap(
-            this.player,
-            this.pickupGroup,
-            (player, pickup) => {
-                this.collectPickup(
-                    player as Phaser.Physics.Arcade.Sprite,
-                    pickup as Phaser.Physics.Arcade.Image
-                );
-            },
-            undefined,
-            this
-        );
-
+        
         // Add physics bounds
         this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height);
 
@@ -93,54 +76,103 @@ this.pickupSpawnPoints = [
         });
 
         // Load the map with better error handling
-        try {
-            for (let y = 0; y < data.length; y++) {
-                for (let x = 0; x < data[y].length; x++) {
-                    switch (data[y][x]) {
-                        case CONSTANTS.TERRAIN_RIGHT_INDEX:
-                            this.mapTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT));
-                            break;
-                        case CONSTANTS.TERRAIN_LEFT_INDEX:
-                            this.mapTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_LEFT));
-                            break;
-                        case CONSTANTS.TERRAIN_CENTER_INDEX:
-                            this.mapTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_CENTER));
-                            break;
-                        case CONSTANTS.TERRAIN_RIGHT_EDGE_INDEX:
-                            this.mapTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT_EDGE));
-                            break;
-                        case CONSTANTS.TERRAIN_LEFT_EDGE_INDEX:
-                            this.mapTiles.push(this.createTile(x, y, CONSTANTS.TERRAIN_LEFT_EDGE));
-                            break;
-                        default:
-                            console.warn(`Unknown tile type at (${x}, ${y}): ${data[y][x]}`);
-                    }
+        
+        const data = TileDataReader.readTileData(this.cache.text.get(CONSTANTS.TILE_DATA));
+        let tile : Ground;
+        for (let y = 0; y < data.length; y++) {
+            for (let x = 0; x < data[y].length; x++) {
+                switch (data[y][x]) {
+                    case CONSTANTS.TERRAIN_RIGHT_INDEX:
+                        tile = this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT);
+                        this.rightTiles.push(tile);
+                        tile.setImmovable(true);
+                        break;
+                    case CONSTANTS.TERRAIN_LEFT_INDEX:
+                        tile = this.createTile(x, y, CONSTANTS.TERRAIN_LEFT);
+                        this.leftTiles.push(tile);
+                        tile.setImmovable(true);
+                        break;
+                    case CONSTANTS.TERRAIN_CENTER_INDEX:
+                        tile = this.createTile(x, y, CONSTANTS.TERRAIN_CENTER);
+                        this.midTiles.push(tile);
+                        tile.setImmovable(true);
+                        break;
+                    case CONSTANTS.TERRAIN_RIGHT_EDGE_INDEX:
+                        tile = this.createTile(x, y, CONSTANTS.TERRAIN_RIGHT_EDGE);
+                        this.midTiles.push(tile);
+                        tile.setImmovable(true);
+                        break;
+                    case CONSTANTS.TERRAIN_LEFT_EDGE_INDEX:
+                        tile = this.createTile(x, y, CONSTANTS.TERRAIN_LEFT_EDGE);
+                        this.midTiles.push(tile);
+                        tile.setImmovable(true);
+                        break;
                 }
             }
-        } catch (error) {
-            console.error('Error loading map:', error);
-        }
+        } 
+        this.rightTiles.forEach(tile =>{
+            tile.setImmovable(true);
+        })
+        this.leftTiles.forEach(tile =>{
+            tile.setImmovable(true);
+        })
+        this.midTiles.forEach(tile =>{
+            tile.setImmovable(true)
+        })
+        
+        this.cursor = this.input?.keyboard?.createCursorKeys();
+        this.keyW = this.input?.keyboard?.addKey("W");
+        this.keyA = this.input?.keyboard?.addKey("A");
+        this.keyS = this.input?.keyboard?.addKey("S");
+        this.keyD = this.input?.keyboard?.addKey("D");
+
+        this.spawnPlayer();
+        this.physics.add.overlap(
+            this.player1.player,
+            this.pickupGroup,
+            (player, pickup) => {
+                this.collectPickup(
+                    player as Phaser.Physics.Arcade.Sprite,
+                    pickup as Phaser.Physics.Arcade.Image
+                );
+            },
+            undefined,
+            this
+        );
+        this.physics.add.overlap(
+            this.player2.player,
+            this.pickupGroup,
+            (player, pickup) => {
+                this.collectPickup(
+                    player as Phaser.Physics.Arcade.Sprite,
+                    pickup as Phaser.Physics.Arcade.Image
+                );
+            },
+            undefined,
+            this
+        );
+        this.physics.add.collider(this.player1.player, this.leftTiles);
+        this.physics.add.collider(this.player2.player, this.rightTiles);
+        this.physics.add.overlap(this.player1.player, this.midTiles, () => {
+            this.player1.isInTheMiddle = true;
+        })
+        this.physics.add.overlap(this.player1.player, this.rightTiles, () => {
+            this.player1.isInTheMiddle = false;
+        })
+        this.physics.add.overlap(this.player2.player, this.midTiles, () => {
+            this.player2.isInTheMiddle = true;
+        })
+        this.physics.add.overlap(this.player2.player, this.leftTiles, () => {
+            this.player2.isInTheMiddle = false;
+        })
     }
 
-    update() {
-        // Update player outline position to follow player
-        if (this.playerOutline) {
-        this.drawPlayerOutline(this.pickupActive ? 0x00ff00 : 0xffffff);
-    }
+    update(time: number, delta: number): void {
+        this.player1.movePlayer(this.cursor?.up, this.cursor?.down, this.cursor?.left, this.cursor?.right);
+        this.player2.movePlayer(this.keyW, this.keyS, this.keyA, this.keyD);
     }
 
-    private drawPlayerOutline(color: number): void {
-    if (!this.playerOutline || !this.player) return;
     
-    this.playerOutline.clear();
-    this.playerOutline.lineStyle(4, color, 1);
-    this.playerOutline.strokeRect(
-        this.player.x - this.player.displayWidth / 2,
-        this.player.y - this.player.displayHeight / 2,
-        this.player.displayWidth,
-        this.player.displayHeight
-    );
-}
 
     private spawnPickup(): void {
     if (this.pickupGroup.getLength() >= 10) return;
@@ -198,18 +230,16 @@ this.time.delayedCall(3000, () => {
 
 
 
-    private collectPickup(player: Phaser.Physics.Arcade.Sprite, pickup: Phaser.Physics.Arcade.Image): void {
+    private collectPickup(player: Player, pickup: Phaser.Physics.Arcade.Image): void {
         // Only collect if we don't already have an active pickup
-        if (this.pickupActive || !pickup.active) return;
+        if (player.pickupActive || !pickup.active) return;
 
         // Remove the pickup
         pickup.disableBody(true, true);
         
         // Set pickup as active
-        this.pickupActive = true;
+        player.pickupActive = true;
         
-        // Change outline color to green
-        this.drawPlayerOutline(0x00ff00);
         
         // Reset any existing timer
         if (this.pickupTimer) {
@@ -218,12 +248,19 @@ this.time.delayedCall(3000, () => {
 
         // Set timer to reset after 15 seconds
         this.pickupTimer = this.time.delayedCall(15000, () => {
-            this.drawPlayerOutline(0xffffff); // Reset to white
-            this.pickupActive = false; // Allow new pickups to be collected
+            player.pickupActive = false; // Allow new pickups to be collected
         }, [], this);
     }
+    spawnPlayer() {
+        this.player1 = new Player(this, CONSTANTS.WINDOW_WIDTH - CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.PLAYER_TILE_SIZE / 2 , CONSTANTS.PLAYER);
+        this.player1.player.rotation = Math.PI;
+        this.player1.player.tint = 0xff3333;
 
-    private createTile(x: number, y: number, tileTexture: string, tintColor?: number): Ground {
+         // Spawn Player 2
+        this.player2 = new Player(this, CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.PLAYER_TILE_SIZE / 2 , CONSTANTS.PLAYER);
+        this.player2.player.tint = 0x3333ff;
+    }
+    createTile(x: number, y: number, tileTexture: string, tintColor?: number) {
         const tileX = x * CONSTANTS.TERRAIN_TILE_SIZE + CONSTANTS.TERRAIN_TILE_SIZE / 2;
         const tileY = y * CONSTANTS.TERRAIN_TILE_SIZE + CONSTANTS.TERRAIN_TILE_SIZE / 2;
         
@@ -243,4 +280,6 @@ this.time.delayedCall(3000, () => {
         
         return platformTile;
     }
+    
+    
 }

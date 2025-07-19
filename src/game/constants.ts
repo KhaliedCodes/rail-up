@@ -1,6 +1,11 @@
 export const CONSTANTS = {
-    WINDOW_WIDTH: 1088,
-    WINDOW_HEIGHT: 768,
+    PLAYER_TILE_SIZE: 64,
+    PLAYER: 'player',
+    PLAYER_TEXTURE_PATH: 'PNG/Default size/towerDefense_tile245.png',
+    PLAYER_IDLE: 'playerIdle',
+    PLAYER_RUN: 'playerRun',
+    WINDOW_WIDTH: 17*64,
+    WINDOW_HEIGHT: 12*64,
     TERRAIN_TILE_SIZE: 64,
     TERRAIN_RIGHT: "terrain-right",
     TERRAIN_LEFT: "terrain-left",
