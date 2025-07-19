@@ -37,7 +37,7 @@ export class Controls extends Phaser.Scene {
       { key1: 'A', action1: 'Rotate Left',    key2: '←', action2: 'Rotate Left' },
       { key1: 'S', action1: 'Move Backward',key2: '↓', action2: 'Move Backward' },
       { key1: 'D', action1: 'Rotate Right',   key2: '→', action2: 'Rotate Right' },
-      { key1: 'E', action1: 'Throw',        key2: 'Ctrl', action2: 'Throw' },
+      { key1: 'E', action1: 'Shoot',        key2: 'Ctrl', action2: 'Shoot' },
     ];
 
     const startY = 180;
