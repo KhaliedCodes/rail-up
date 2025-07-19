@@ -64,13 +64,14 @@ export class Game extends Scene {
         this.player2.movePlayer(this.keyW, this.keyS, this.keyA, this.keyD);
     }
     spawnPlayer() {
-        this.player1 = new Player(this, CONSTANTS.WINDOW_WIDTH - CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT - CONSTANTS.TERRAIN_TILE_SIZE - CONSTANTS.PLAYER_TILE_SIZE / 2 , CONSTANTS.PLAYER);
+        this.player1 = new Player(this, CONSTANTS.WINDOW_WIDTH - CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.PLAYER_TILE_SIZE / 2 , CONSTANTS.PLAYER);
+        this.player1.player.rotation = Math.PI;
         //this.player1.player.anims.play(CONSTANTS.PLAYER_IDLE_OUTLINE);
         //this.player1.player.flipX = true;
         this.player1.player.tint = 0xff8888; // Change color for player 1
 
          // Spawn Player 2
-        this.player2 = new Player(this, CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT - CONSTANTS.TERRAIN_TILE_SIZE - CONSTANTS.PLAYER_TILE_SIZE / 2 , CONSTANTS.PLAYER);
+        this.player2 = new Player(this, CONSTANTS.TERRAIN_TILE_SIZE, CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.PLAYER_TILE_SIZE / 2 , CONSTANTS.PLAYER);
         //this.player2.player.anims.play(CONSTANTS.PLAYER_IDLE);
         this.player2.player.tint = 0x8888ff; // Change color for player 2
     }
