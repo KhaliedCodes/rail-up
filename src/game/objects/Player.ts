@@ -10,6 +10,7 @@ export class Player {
     isInTheMiddle: boolean = false;
     pickupActive: boolean = false;
     isCarryingCollectible: boolean = false;
+    isAtTurret: boolean = false;
     charges: number = 0;
     maxCharges: number = 5;
     canshoot: boolean = true;

@@ -30,6 +30,7 @@ export class Game extends Scene {
 
     private pickupTimer: Phaser.Time.TimerEvent;
     private pickupSpawnPoints: { x: number, y: number }[] = [];
+    private airplane: Phaser.Physics.Arcade.Image;
     midTiles: Ground[] = [];
     rightTiles: Ground[] = [];
     leftTiles: Ground[] = []
@@ -66,7 +67,6 @@ export class Game extends Scene {
             classType: Phaser.Physics.Arcade.Image,
             runChildUpdate: true,
         });
-
         // Improved collision detection
 
         // Add physics bounds
@@ -74,17 +74,51 @@ export class Game extends Scene {
 
         // Timer to spawn pickups with better error handling
         this.time.addEvent({
-            delay: 1500,
+    delay: 4000, 
+    loop: true,
+    callback: () => {
+        const airplaneY = Phaser.Math.Between(100, this.scale.height - 100);
+        const airplane = this.physics.add.image(-100, airplaneY, CONSTANTS.PLANES);
+        airplane.setVelocityX(200);
+        airplane.setDepth(5);
+        airplane.setImmovable(true);
+
+        const dropX = this.scale.width / 2;
+        let hasDropped = false;
+
+        this.time.addEvent({
+            delay: 100,
             loop: true,
             callback: () => {
-                try {
-                    this.spawnPickup();
-                } catch (error) {
-                    console.error('Error spawning pickup:', error);
+                if (!airplane.active || hasDropped) return;
+
+                if (airplane.x >= dropX) {
+                    hasDropped = true;
+
+                    // أول pickup
+                    const offset1 = Phaser.Math.Between(-40, 40);
+                    this.spawnPickupFromAirplane(airplane.x + offset1, airplane.y + 30);
+
+                    // بعد نصف ثانية، نعمل spawn للتاني
+                    this.time.delayedCall(500, () => {
+                        if (!airplane.active) return;
+                        const offset2 = Phaser.Math.Between(-40, 40);
+                        this.spawnPickupFromAirplane(airplane.x + offset2, airplane.y + 30);
+                    });
                 }
-            },
-            callbackScope: this
+            }
         });
+
+        // Destroy airplane after it's off screen
+        this.time.delayedCall(10000, () => {
+            if (airplane.active) {
+                airplane.destroy();
+            }
+        });
+    }
+});
+
+
 
         // Load the map with better error handling
 
@@ -300,59 +334,30 @@ export class Game extends Scene {
 
 
 
-    private spawnPickup(): void {
-        if (this.pickupGroup.getLength() >= 10) return;
+    private spawnPickupFromAirplane(x: number, y: number): void {
+    const padding = 50;
+    const areaWidth = this.scale.width / 3;
+    const minX = (this.scale.width / 2) - (areaWidth / 2) + padding;
+    const maxX = (this.scale.width / 2) + (areaWidth / 2) - padding;
+    const spawnX = Phaser.Math.Between(minX, maxX);
 
-        const padding = 50;
-        const areaWidth = this.scale.width / 3;
+    const pickup = this.pickupGroup.get(spawnX, y, CONSTANTS.PICKUPS);
+    if (!pickup) return;
 
-        const minX = (this.scale.width / 2) - (areaWidth / 2) + padding;
-        const maxX = (this.scale.width / 2) + (areaWidth / 2) - padding;
+    pickup.setActive(true);
+    pickup.setVisible(true);
+    pickup.enableBody(true, spawnX, y, true, true);
+    pickup.setScale(0.5);
+    pickup.setVelocity(0); // مفيش حركة
+    pickup.setAngularVelocity(0); // مفيش دوران
+    pickup.body.setAllowGravity(false);
 
-        const minY = 0 + padding;
-        const maxY = this.scale.height - padding;
+    this.time.delayedCall(5000, () => {
+        if (pickup.active) pickup.disableBody(true, true);
+    });
+}
 
-        let spawnX = 0;
-        let spawnY = 0;
-        let attempts = 0;
-        let tooClose = true;
 
-        while (tooClose && attempts < 10) {
-            spawnX = Phaser.Math.Between(minX, maxX);
-            spawnY = Phaser.Math.Between(minY, maxY);
-            tooClose = this.pickupGroup.getChildren().some(p => {
-                const pickup = p as Phaser.Physics.Arcade.Image;
-                return pickup.active && Phaser.Math.Distance.Between(pickup.x, pickup.y, spawnX, spawnY) < 40;
-            });
-            attempts++;
-        }
-
-        if (tooClose) {
-            console.warn('Could not find a free spawn point after 10 attempts.');
-            return;
-        }
-
-        const pickup = this.pickupGroup.get(spawnX, spawnY, CONSTANTS.PICKUPS);
-        if (!pickup) {
-            console.warn('Failed to create pickup');
-            return;
-        }
-
-        pickup.setActive(true);
-        pickup.setVisible(true);
-        pickup.enableBody(false, pickup.x, pickup.y, true, true);
-        pickup.setScale(0.5);
-        pickup.setVelocity(0, 0);
-        pickup.setAngularVelocity(0);
-        pickup.setRotation(0);
-        pickup.body.setAllowGravity(false);
-
-        this.time.delayedCall(3000, () => {
-            if (pickup.active) {
-                pickup.disableBody(true, true);
-            }
-        }, [], this);
-    }
 
     private tryActivateTurret(player: Player) {
         if (player.charges >= player.maxCharges) {

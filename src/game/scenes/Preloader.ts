@@ -36,6 +36,7 @@ export class Preloader extends Scene
 
         this.load.image('logo', 'logo.png');
         this.load.image(CONSTANTS.PICKUPS, CONSTANTS.PICKUPS_PATH);
+        this.load.image(CONSTANTS.PLANES, CONSTANTS.PLANE_PATH);
         this.load.image(CONSTANTS.BULLET, CONSTANTS.BULLET_TEXTURE_PATH);
         this.load.text(CONSTANTS.TILE_DATA, CONSTANTS.TILE_DATA_PATH);
         this.load.image(CONSTANTS.TERRAIN_RIGHT, CONSTANTS.TERRAIN_RIGHT_TEXTURE);
@@ -74,8 +75,8 @@ export class Preloader extends Scene
             const savedVolume = parseFloat(localStorage.getItem('estlem_music_volume') || '0.3');
             const savedMuted = localStorage.getItem('estlem_music_muted') === 'true';
 
-            music.setVolume(savedVolume);
-            music.setMute(savedMuted);
+            //music.setVolume(savedVolume);
+           // music.setMute(savedMuted);
 
             music.play();
         }
